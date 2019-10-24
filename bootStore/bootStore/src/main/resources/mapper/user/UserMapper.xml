@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.neusoft.bookstore.user.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.neusoft.bookstore.user.model.User">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="userName" property="userName" jdbcType="VARCHAR"/>
+        <result column="email" property="email" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <!--多对一配置-->
+        <association property="dept" javaType="com.neusoft.bookstore.user.model.Dept">
+            <id column="d_id" property="id" jdbcType="BIGINT"/>
+            <result column="dept_name" property="deptName" jdbcType="VARCHAR"/>
+        </association>
+    </resultMap>
+    <!--一对多配置-->
+    <resultMap id="DeptBaseResultMap" type="com.neusoft.bookstore.user.model.Dept">
+        <id column="d_id" property="id" jdbcType="BIGINT"/>
+        <result column="dept_name" property="deptName" jdbcType="VARCHAR"/>
+        <!--一对多配置-->
+        <collection property="users" ofType="com.neusoft.bookstore.user.model.User">
+            <id column="id" property="id" jdbcType="BIGINT"/>
+            <result column="userName" property="userName" jdbcType="VARCHAR"/>
+            <result column="email" property="email" jdbcType="VARCHAR"/>
+            <result column="address" property="address" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+    <sql id="base_sql">
+        id,userName,email,address
+    </sql>
+    <!--保存用户-->
+    <insert id="saveUser" parameterType="com.neusoft.bookstore.user.model.User">
+        insert into t_user(
+        id,userName,email,address
+        )
+        value (#{id},#{userName},#{email},#{address})
+    </insert>
+
+    <!--修改-->
+    <update id="updateUser" parameterType="com.neusoft.bookstore.user.model.User">
+        update t_user
+        set userName = #{userName},
+        email = #{email},
+        address = #{address}
+        where id = #{id}
+    </update>
+
+    <!--删除-->
+    <delete id="deleteUser" parameterType="com.neusoft.bookstore.user.model.User">
+        delete from t_user where id = #{id}
+    </delete>
+    <!--查询用户列表-->
+    <select id="listUser" resultMap="BaseResultMap">
+        select
+        <include refid="base_sql"/>
+        from t_user
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+            <if test="userName != null">
+                and userName = #{userName}
+            </if>
+            <if test="email != null">
+                and email = #{email}
+            </if>
+            <if test="address != null">
+                and address = #{address}
+            </if>
+        </where>
+    </select>
+    <!--批量查询id用户信息-->
+    <select id="getUserById" resultMap="BaseResultMap">
+        select
+        <include refid="base_sql"/>
+        from t_user
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <!--批量保存用户-->
+    <insert id="saveUserList">
+        insert into t_user(
+        id,userName,email,address
+        )
+        values
+        <foreach collection="users" item="item" separator=",">
+            (#{item.id},#{item.userName},#{item.email},#{item.address})
+        </foreach>
+    </insert>
+    <!--批量删除-->
+    <delete id="deleteUsers">
+        delete from t_user
+        where id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+    <!--多对一-->
+    <select id="listManyToOne" resultMap="BaseResultMap">
+        select u.id, u.userName, u.email, u.address, d.id as d_id, d.dept_name
+        from t_user u, t_dept d
+        where u.dept_id = d.id
+    </select>
+    <!--一对多-->
+    <select id="listOneToMany" resultMap="DeptBaseResultMap">
+        select d.id as d_id,d.dept_name,u.id,u.userName,u.email,u.address
+        from t_dept d left join t_user u
+        on d.id = u.dept_id
+    </select>
+</mapper>

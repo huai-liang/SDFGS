@@ -1,0 +1,54 @@
+server:
+  port: 8082
+  servlet:
+    session:
+      timeout: 30s
+#���ݿ�����
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+    username: root
+    password: 123456
+    druid:
+      initialSize: 1
+      minIdle: 1
+      maxActive: 20
+      maxWait: 60000
+      validationQuery: select 'x' from dual
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      filters: stat,slf4j
+  cloud:
+    loadbalancer:
+      retry:
+        enabled: false
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      enabled: true
+#mybatis
+mybatis:
+  mapper-locations: classpath:mapper/**/*Mapper.xml
+  config-location: classpath:mapper/mybatis-config.xml
+#mybatis��ҳ�������
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+logging:
+  level:
+    com.neusoft.bootstore.*.mapper: debug
+    com.neusoft.bootstore: debug
+  config: classpath:logback-spring.xml
+fdfs:
+  tracker-list: 10.61.23.216:22122
+  hostPort: http://10.61.23.216:80/

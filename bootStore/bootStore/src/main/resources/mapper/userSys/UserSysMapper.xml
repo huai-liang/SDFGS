@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.neusoft.bookstore.userSys.mapper.UserSysMapper">
+    <resultMap id="BaseResultMapSys" type="com.neusoft.bookstore.userSys.model.UserSys">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_name" property="user_name" jdbcType="VARCHAR"/>
+        <result column="user_acct" property="user_acct" jdbcType="VARCHAR"/>
+        <result column="user_password" property="user_password" jdbcType="VARCHAR"/>
+        <result column="user_email" property="user_email" jdbcType="VARCHAR"/>
+        <result column="create_at" property="create_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="baseusersys_sql">
+        id,user_name,user_acct,user_password,user_email,create_at
+    </sql>
+    <!--批量保存用户-->
+    <insert id="saveUserSysList">
+        insert into t_sys_user(
+        id,user_name,user_acct,user_password,user_email,create_at
+        )
+        values
+        <foreach collection="userSys" item="item" separator=",">
+            (#{item.id},#{item.user_name},#{item.user_acct}
+            ,#{item.user_password},#{item.user_email},#{item.create_at})
+        </foreach>
+    </insert>
+    <!--批量删除-->
+    <delete id="deleteUserSys">
+        delete from t_sys_user
+        where user_name in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+    <select id="getUserByName" resultMap="BaseResultMapSys">
+        select
+        <include refid="baseusersys_sql"/>
+        from t_sys_user
+        where user_name in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY create_at DESC
+    </select>
+    <!--分页查询-->
+    <select id="listSysUserByPage" resultMap="BaseResultMapSys">
+        select user_name,user_acct,user_password,user_email,create_at
+        from t_sys_user
+        limit ${startData},${pageSize}
+    </select>
+    <select id="listUserCount" resultType="java.lang.Integer">
+        select count(*) from t_sys_user
+    </select>
+    <!--分页插件查询-->
+    <select id="listUserPageInfo" resultMap="BaseResultMapSys">
+        select user_name,user_acct,user_password,user_email,create_at
+        from t_sys_user
+    </select>
+</mapper>

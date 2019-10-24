@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.neusoft.bookstore.shuffling.mapper.ShufflingMapper">
+    <resultMap id="ShufflingResultMap" type="com.neusoft.bookstore.shuffling.model.Shuffling">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="url" property="url" jdbcType="VARCHAR"/>
+        <result column="file_path" property="filePath" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="Column_List">
+        id,url,file_path,status
+    </sql>
+    <!--保存文件-->
+    <insert id="saveShuffling">
+        insert into t_shuffling (
+        url,file_path,status,
+        is_deleted,sort_no,gmt_create,create_by,
+        gmt_modified,last_modified_by,version
+        )
+        values(
+            #{url},#{filePath},'0',
+            0,1,now(),#{createBy},
+            now(),#{createBy},1
+            )
+    </insert>
+    <!--查询文件信息-->
+    <select id="listShuffling" resultMap="ShufflingResultMap">
+        select
+        <include refid="Column_List"/>
+        from t_shuffling
+        where is_deleted=0
+        <if test="null != status and '' != status">
+            and status = #{status}
+        </if>
+        order by gmt_modified desc
+    </select>
+
+    <update id="deleteShufflingById">
+        update t_shuffling set is_deleted = 1,gmt_modified = now()
+        where id = #{id}
+    </update>
+    <update id="updShuffling">
+        update t_shuffling set status = #{status},gmt_modified = now()
+        where id = #{id}
+    </update>
+</mapper>
